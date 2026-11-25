@@ -3,9 +3,8 @@
  * Reusable card component for displaying doctor information
  */
 
-// Import services (these will be implemented in next lab)
-// import { deleteDoctor } from './services/doctorServices.js';
-// import { getPatientData } from './services/patientServices.js';
+import { bookAppointment } from '../services/appointmentRecordService.js';
+import { openModal } from './modals.js';
 
 export function createDoctorCard(doctor) {
     // Create main card container
@@ -107,19 +106,14 @@ export function createDoctorCard(doctor) {
         bookNow.textContent = "Book Now";
         bookNow.classList.add("book-btn");
         bookNow.addEventListener("click", async (e) => {
-            try {
-                const token = localStorage.getItem("token");
-                // const patientData = await getPatientData(token);
-                // For now, use mock patient data
-                const patientData = {
-                    id: localStorage.getItem("patientId") || "patient-123",
-                    name: localStorage.getItem("patientName") || "Patient User"
-                };
-                showBookingOverlay(e, doctor, patientData);
-            } catch (error) {
-                console.error("Error getting patient data:", error);
-                showNotification("Failed to load patient data", "error");
+            if (!localStorage.getItem("token")) {
+                alert("Your session has expired. Please log in again to book an appointment.");
+                window.location.href = "/";
+                return;
             }
+
+            const patientData = { name: localStorage.getItem("patientName") || "Logged-in patient" };
+            showBookingOverlay(e, doctor, patientData);
         });
         actionsDiv.appendChild(bookNow);
 
@@ -151,9 +145,6 @@ export function createDoctorCard(doctor) {
 
 // Helper function to show booking overlay
 function showBookingOverlay(event, doctor, patientData) {
-    console.log("Booking overlay for:", doctor.name);
-    console.log("Patient data:", patientData);
-    
     // Create ripple effect
     createRippleEffect(event);
     
@@ -207,16 +198,6 @@ function showBookingModal(doctor, patientData) {
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="symptoms">Symptoms/Reason:</label>
-                        <textarea id="symptoms" placeholder="Describe your symptoms or reason for visit..." required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="notes">Additional Notes:</label>
-                        <textarea id="notes" placeholder="Any additional information..."></textarea>
-                    </div>
-                    
                     <div class="booking-actions">
                         <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
                         <button type="submit" class="confirm-booking-btn">Confirm Booking</button>
@@ -230,7 +211,7 @@ function showBookingModal(doctor, patientData) {
         // Add form submission handler
         const form = document.getElementById('bookingForm');
         if (form) {
-            form.addEventListener('submit', (e) => handleBookingSubmit(e, doctor, patientData));
+        form.addEventListener('submit', (e) => handleBookingSubmit(e, doctor));
         }
     }
 }
@@ -244,38 +225,49 @@ function getTomorrowDate() {
 
 // Helper function to generate time slots
 function generateTimeSlots(availableTimes) {
-    if (!availableTimes || !Array.isArray(availableTimes)) {
-        return '<option value="09:00">09:00 AM</option><option value="10:00">10:00 AM</option>';
+    if (!Array.isArray(availableTimes) || availableTimes.length === 0) {
+        return '<option value="">No available times</option>';
     }
     
     return availableTimes.map(time => {
-        // Simple time formatting - you might want to enhance this
-        const formattedTime = time.replace('-', ' - ');
-        return `<option value="${time}">${formattedTime}</option>`;
+        const [startTime] = time.split('-');
+        return `<option value="${startTime}">${time.replace('-', ' - ')}</option>`;
     }).join('');
 }
 
 // Helper function to handle booking submission
-function handleBookingSubmit(event, doctor, patientData) {
+async function handleBookingSubmit(event, doctor) {
     event.preventDefault();
-    
-    const formData = {
-        doctorId: doctor.id,
-        patientId: patientData.id,
-        appointmentDate: document.getElementById('appointmentDate').value,
-        appointmentTime: document.getElementById('appointmentTime').value,
-        symptoms: document.getElementById('symptoms').value,
-        notes: document.getElementById('notes').value,
-        status: 'scheduled'
-    };
-    
-    console.log("Booking submitted:", formData);
-    
-    // Simulate API call
-    setTimeout(() => {
-        showNotification("Appointment booked successfully!", "success");
+
+    const appointmentDate = document.getElementById('appointmentDate').value;
+    const appointmentTime = document.getElementById('appointmentTime').value;
+    const token = localStorage.getItem('token');
+    if (!appointmentDate || !appointmentTime) {
+        alert('Please select an appointment date and available time.');
+        return;
+    }
+    if (!token) {
+        alert('Your session has expired. Please log in again to book an appointment.');
+        window.location.href = '/';
+        return;
+    }
+
+    const submitButton = event.submitter;
+    if (submitButton) submitButton.disabled = true;
+
+    const result = await bookAppointment({
+        doctor: { id: doctor.id },
+        appointmentTime: `${appointmentDate}T${appointmentTime}:00`,
+        status: 0
+    }, token);
+
+    if (result.success) {
+        showNotification('Appointment booked successfully!', 'success');
         closeModal();
-    }, 1000);
+    } else {
+        alert(`Failed to book appointment: ${result.message}`);
+        if (submitButton) submitButton.disabled = false;
+    }
 }
 
 // Helper function to show doctor details

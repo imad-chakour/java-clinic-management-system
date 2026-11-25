@@ -7,6 +7,8 @@
 import { openModal } from '../components/modals.js';
 import { API_BASE_URL } from '../config/config.js';
 
+window.openAppModal = openModal;
+
 // Define API endpoints
 const ADMIN_API = API_BASE_URL + '/admin/login';
 const DOCTOR_API = API_BASE_URL + '/doctor/login';
@@ -88,7 +90,7 @@ window.adminLoginHandler = async function(event) {
             
         } else {
             const errorData = await response.json();
-            alert(errorData.message || 'Invalid credentials!');
+            alert(errorData.error || errorData.message || 'Invalid credentials!');
         }
     } catch (error) {
         console.error('Admin login error:', error);
@@ -108,7 +110,7 @@ window.doctorLoginHandler = async function(event) {
         return;
     }
 
-    const doctor = { email, password };
+    const doctor = { identifier: email, password };
 
     try {
         const response = await fetch(DOCTOR_API, {
@@ -139,7 +141,7 @@ window.doctorLoginHandler = async function(event) {
             
         } else {
             const errorData = await response.json();
-            alert(errorData.message || 'Invalid credentials!');
+            alert(errorData.error || errorData.message || 'Invalid credentials!');
         }
     } catch (error) {
         console.error('Doctor login error:', error);
@@ -159,7 +161,7 @@ window.patientLoginHandler = async function(event) {
         return;
     }
 
-    const patient = { email, password };
+    const patient = { identifier: email, password };
 
     try {
         // This endpoint will be defined in your backend
@@ -191,7 +193,7 @@ window.patientLoginHandler = async function(event) {
             
         } else {
             const errorData = await response.json();
-            alert(errorData.message || 'Invalid credentials!');
+            alert(errorData.error || errorData.message || 'Invalid credentials!');
         }
     } catch (error) {
         console.error('Patient login error:', error);
@@ -218,7 +220,7 @@ window.patientSignupHandler = async function(event) {
 
     try {
         // This endpoint will be defined in your backend
-        const response = await fetch(API_BASE_URL + '/patient/signup', {
+        const response = await fetch(API_BASE_URL + '/patient', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json'
@@ -237,7 +239,7 @@ window.patientSignupHandler = async function(event) {
             
         } else {
             const errorData = await response.json();
-            alert(errorData.message || 'Registration failed!');
+            alert(errorData.error || errorData.message || 'Registration failed!');
         }
     } catch (error) {
         console.error('Patient signup error:', error);

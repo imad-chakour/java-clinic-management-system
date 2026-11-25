@@ -5,9 +5,11 @@ import com.project.back_end.models.Patient;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.MainService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -22,6 +24,13 @@ public class PatientController {
     public PatientController(PatientService patientService, MainService service) {
         this.patientService = patientService;
         this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<Void> getPatientDashboard() {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("/pages/patientDashboard.html"))
+                .build();
     }
 
     // 3. Define the getPatient Method

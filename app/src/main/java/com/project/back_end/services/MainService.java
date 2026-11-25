@@ -50,7 +50,7 @@ public class MainService {
         Map<String, String> response = new HashMap<>();
         
         try {
-            boolean isValid = tokenService.validateToken(token);
+            boolean isValid = tokenService.validateToken(token, user);
             if (!isValid) {
                 response.put("error", "Invalid or expired token");
                 return ResponseEntity.status(401).body(response);

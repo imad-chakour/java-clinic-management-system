@@ -91,11 +91,11 @@ function renderDoctorCards(doctors) {
 window.signupPatient = async function() {
     try {
         // Collect form data
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const phone = document.getElementById('phone').value;
-        const address = document.getElementById('address').value;
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const phone = document.getElementById('signupPhone').value;
+        const address = document.getElementById('signupAddress').value;
 
         // Validation
         if (!name || !email || !password || !phone || !address) {
@@ -134,8 +134,8 @@ window.signupPatient = async function() {
 window.loginPatient = async function() {
     try {
         // Collect form data
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const email = document.getElementById('patientEmail').value;
+        const password = document.getElementById('patientPassword').value;
 
         // Validation
         if (!email || !password) {
@@ -144,7 +144,7 @@ window.loginPatient = async function() {
         }
 
         const loginData = {
-            email,
+            identifier: email,
             password
         };
 
@@ -159,7 +159,7 @@ window.loginPatient = async function() {
             closeModal();
             
             // Redirect to logged patient dashboard
-            window.location.href = 'loggedPatientDashboard.html';
+            window.location.href = '/pages/loggedPatientDashboard.html';
 
         } else {
             alert(result.message || 'Login failed!');

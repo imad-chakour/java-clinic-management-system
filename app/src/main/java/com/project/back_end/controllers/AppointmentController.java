@@ -66,7 +66,7 @@ public class AppointmentController {
 
         try {
             // Validate appointment data
-            if (appointment.getDoctor() == null || appointment.getPatient() == null || 
+            if (appointment.getDoctor() == null ||
                 appointment.getAppointmentTime() == null) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Missing required appointment data"));
@@ -83,7 +83,7 @@ public class AppointmentController {
             }
 
             // Book the appointment
-            int bookingResult = appointmentService.bookAppointment(appointment);
+            int bookingResult = appointmentService.bookAppointment(appointment, token);
             if (bookingResult == 1) {
                 return ResponseEntity.status(201)
                         .body(Map.of("message", "Appointment booked successfully"));

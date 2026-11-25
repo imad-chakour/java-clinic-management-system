@@ -43,11 +43,16 @@ public class AppointmentService {
 
     // 4. Book Appointment Method
     @Transactional
-    public int bookAppointment(Appointment appointment) {
+    public int bookAppointment(Appointment appointment, String token) {
         try {
             // Validate required fields
-            if (appointment.getDoctor() == null || appointment.getPatient() == null || 
+            if (appointment.getDoctor() == null || appointment.getDoctor().getId() == null ||
                 appointment.getAppointmentTime() == null) {
+                return 0;
+            }
+
+            Long patientId = tokenService.extractPatientId(token);
+            if (patientId == null) {
                 return 0;
             }
             
@@ -57,11 +62,14 @@ public class AppointmentService {
                 return 0;
             }
             
-            // Check if patient exists
-            Optional<Patient> patient = patientRepository.findById(appointment.getPatient().getId());
+            // Derive the patient from the authenticated token rather than trusting request data.
+            Optional<Patient> patient = patientRepository.findById(patientId);
             if (patient.isEmpty()) {
                 return 0;
             }
+
+            appointment.setDoctor(doctor.get());
+            appointment.setPatient(patient.get());
             
             // Check for conflicting appointments
             LocalDateTime appointmentTime = appointment.getAppointmentTime();
@@ -74,11 +82,6 @@ public class AppointmentService {
             
             if (!conflictingAppointments.isEmpty()) {
                 return 0; // Conflict found
-            }
-            
-            // Set default status if not provided
-            if (appointment.getStatus() == 0) {
-                appointment.setStatus(1); // Default to scheduled status
             }
             
             appointmentRepository.save(appointment);

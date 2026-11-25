@@ -15,7 +15,7 @@ export async function getAllAppointments(date, patientName, token) {
 
 export async function bookAppointment(appointment, token) {
   try {
-    const response = await fetch(`${APPOINTMENT_API}/${token}`, {
+    const response = await fetch(`${APPOINTMENT_API}/${encodeURIComponent(token)}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -26,7 +26,7 @@ export async function bookAppointment(appointment, token) {
     const data = await response.json();
     return {
       success: response.ok,
-      message: data.message || "Something went wrong"
+      message: data.error || data.message || "Something went wrong"
     };
   } catch (error) {
     console.error("Error while booking appointment:", error);

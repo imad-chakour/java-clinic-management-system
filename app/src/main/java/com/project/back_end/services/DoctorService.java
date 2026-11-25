@@ -65,9 +65,10 @@ public class DoctorService {
             // Filter available slots
             for (String timeSlot : availableTimes) {
                 try {
-                    LocalTime slotTime = LocalTime.parse(timeSlot);
+                    String slotStart = timeSlot.split("-", 2)[0].trim();
+                    LocalTime slotTime = LocalTime.parse(slotStart);
                     if (!bookedSlots.contains(slotTime)) {
-                        availableSlots.add(timeSlot);
+                        availableSlots.add(slotTime.toString());
                     }
                 } catch (Exception e) {
                     // Skip invalid time formats
@@ -168,6 +169,8 @@ public class DoctorService {
             String token = tokenService.generateDoctorToken(doctor.getId(), doctor.getEmail());
             response.put("token", token);
             response.put("message", "Login successful");
+            response.put("doctorId", doctor.getId().toString());
+            response.put("name", doctor.getName());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

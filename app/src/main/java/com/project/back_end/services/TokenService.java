@@ -114,7 +114,7 @@ public class TokenService {
     public boolean validateToken(String token, String user) {
         try {
             String identifier = extractIdentifier(token);
-            if (identifier == null) {
+            if (identifier == null || user == null || !user.equalsIgnoreCase(extractRole(token))) {
                 return false;
             }
 

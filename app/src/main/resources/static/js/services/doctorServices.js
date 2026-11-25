@@ -81,7 +81,7 @@ export async function deleteDoctor(id, token) {
  */
 export async function saveDoctor(doctor, token) {
     try {
-        const response = await fetch(`${DOCTOR_API}?token=${token}`, {
+        const response = await fetch(`${DOCTOR_API}/${encodeURIComponent(token)}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export async function saveDoctor(doctor, token) {
         } else {
             return {
                 success: false,
-                message: data.message || 'Failed to save doctor'
+                message: data.error || data.message || 'Failed to save doctor'
             };
         }
         

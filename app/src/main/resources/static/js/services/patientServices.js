@@ -59,7 +59,10 @@ export async function patientLogin(data) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                identifier: data.identifier || data.email,
+                password: data.password
+            })
         });
 
         const result = await response.json();
@@ -93,7 +96,7 @@ export async function patientLogin(data) {
  */
 export async function getPatientData(token) {
     try {
-        const response = await fetch(`${PATIENT_API}/data`, {
+        const response = await fetch(`${PATIENT_API}/${encodeURIComponent(token)}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -154,7 +157,10 @@ export async function getPatientById(patientId, token) {
  */
 export async function getPatientAppointments(id, token, user = 'patient') {
     try {
-        const response = await fetch(`${PATIENT_API}/appointments/${id}?user=${user}`, {
+        const endpoint = user === 'patient'
+            ? `${PATIENT_API}/appointments`
+            : `${PATIENT_API}/appointments/${id}?user=${encodeURIComponent(user)}`;
+        const response = await fetch(endpoint, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -176,7 +182,7 @@ export async function getPatientAppointments(id, token, user = 'patient') {
 }
 
 /**
- * Filter appointments based on condition and name
+ * Filter appointments based on condition and doctor name
  * @param {string} condition - Filter condition (e.g., 'pending', 'completed', 'cancelled')
  * @param {string} name - Patient name or doctor name to filter by
  * @param {string} token - Authentication token
@@ -186,9 +192,9 @@ export async function filterAppointments(condition, name, token) {
     try {
         const params = new URLSearchParams();
         if (condition) params.append('condition', condition);
-        if (name) params.append('name', name);
+        if (name) params.append('doctor', name);
 
-        const response = await fetch(`${PATIENT_API}/appointments/filter?${params.toString()}`, {
+        const response = await fetch(`${PATIENT_API}/appointments?${params.toString()}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

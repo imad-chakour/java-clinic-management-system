@@ -143,13 +143,17 @@ function attachModalEventListeners(type, data) {
     // Attach specific event listeners based on modal type
     switch(type) {
         case "patientSignup":
-            document.getElementById("signupBtn").addEventListener("click", window.patientSignupHandler || signupPatient);
+            document.getElementById("signupBtn").addEventListener("click", window.patientSignupHandler || window.signupPatient || signupPatient);
             break;
         case "patientLogin":
-            document.getElementById("loginBtn").addEventListener("click", window.patientLoginHandler || loginPatient);
+            document.getElementById("loginBtn").addEventListener("click", window.patientLoginHandler || window.loginPatient || loginPatient);
             break;
         case 'addDoctor':
-            document.getElementById('saveDoctorBtn').addEventListener('click', window.adminAddDoctor || addDoctor);
+            if (typeof window.adminAddDoctor === 'function') {
+                document.getElementById('saveDoctorBtn').addEventListener('click', window.adminAddDoctor);
+            } else {
+                console.error('Doctor creation handler is unavailable; reload the admin dashboard.');
+            }
             break;
         case 'adminLogin':
             document.getElementById('adminLoginBtn').addEventListener('click', window.adminLoginHandler || adminLogin);
@@ -224,40 +228,6 @@ function loginPatient() {
 
     console.log('Patient login:', { email, password });
     alert('Login functionality will be implemented with backend API');
-}
-
-function addDoctor() {
-    const name = document.getElementById('doctorName').value;
-    const specialization = document.getElementById('specialization').value;
-    const email = document.getElementById('doctorEmail').value;
-    const password = document.getElementById('doctorPassword').value;
-    const phone = document.getElementById('doctorPhone').value;
-    
-    // Get selected availability
-    const availabilityCheckboxes = document.querySelectorAll('input[name="availability"]:checked');
-    const availableTimes = Array.from(availabilityCheckboxes).map(cb => cb.value);
-
-    if (!name || !specialization || !email || !password || !phone) {
-        alert('Please fill in all required fields');
-        return;
-    }
-
-    if (availableTimes.length === 0) {
-        alert('Please select at least one availability time slot');
-        return;
-    }
-
-    const doctorData = {
-        name,
-        specialty: specialization,
-        email,
-        password,
-        phone,
-        availableTimes
-    };
-
-    console.log('Add doctor:', doctorData);
-    alert('Add doctor functionality will be implemented with backend API');
 }
 
 function adminLogin() {
@@ -337,6 +307,8 @@ function confirmBooking(doctorData) {
 window.closeModal = function() {
     document.getElementById('modal').style.display = 'none';
 };
+
+window.openAppModal = openModal;
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

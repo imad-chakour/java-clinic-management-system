@@ -297,6 +297,22 @@ The Dockerfile uses a **multi-stage build**:
 - Stage 1: `maven:3.9.9-eclipse-temurin-17` — compiles and packages the app
 - Stage 2: `eclipse-temurin:17-jre` — lightweight runtime image
 
+### Docker Compose (app + databases)
+
+The repository-root Compose setup runs Spring Boot, MySQL (clinic data and appointments), and MongoDB (prescriptions) with persistent Docker volumes.
+
+1. Copy `.env.example` to `.env` and set private values for `MYSQL_ROOT_PASSWORD` and `JWT_SECRET`. Use a random JWT secret of at least 32 characters.
+2. From the repository root, run:
+
+   ```powershell
+   docker compose up --build
+   ```
+
+3. Open `http://localhost:8080` once the containers are healthy.
+4. Stop the services with `docker compose down`; named volumes retain database data.
+
+The Compose app uses the `docker` Spring profile to connect to the `mysql` and `mongodb` services. The default profile remains configured for databases on `localhost` when running the app from an IDE.
+
 ---
 
 ## 🗄️ Database Configuration
